@@ -5,8 +5,46 @@ import {
   getBankCredentialMeta,
   saveBankCredentials,
 } from "@/server/db/queries/bank-credentials";
-import { BANK_PROVIDERS } from "@/lib/types";
+import { BANK_PROVIDERS, type BankProviderInfo } from "@/lib/types";
 import { getWorkspaceIdFromRequest } from "@/server/lib/workspace-context";
+
+function normalizeCredentials(
+  credentials: Record<string, string>,
+  info: BankProviderInfo
+): Record<string, string> {
+  const normalized: Record<string, string> = {};
+  for (const field of info.credentialFields) {
+    const raw = credentials[field.key] ?? "";
+    const trimmed = raw.trim();
+    normalized[field.key] = field.numeric ? trimmed.replace(/\D/g, "") : trimmed;
+  }
+
+  for (const [key, value] of Object.entries(credentials)) {
+    if (!(key in normalized)) normalized[key] = value;
+  }
+
+  return normalized;
+}
+
+function validateCredentials(
+  credentials: Record<string, string>,
+  info: BankProviderInfo
+): string | null {
+  for (const field of info.credentialFields) {
+    const value = credentials[field.key]?.trim() ?? "";
+    if (!value) return `Missing required field: ${field.label}`;
+    if (field.exactLength != null && value.length !== field.exactLength) {
+      return `${field.label} must be exactly ${field.exactLength} characters.`;
+    }
+    if (field.maxLength != null && value.length > field.maxLength) {
+      return `${field.label} must be ${field.maxLength} characters or fewer.`;
+    }
+    if (field.numeric && !/^\d+$/.test(value)) {
+      return `${field.label} must contain digits only.`;
+    }
+  }
+  return null;
+}
 
 export async function POST(request: Request) {
   const workspaceId = getWorkspaceIdFromRequest(request);
@@ -26,8 +64,15 @@ export async function POST(request: Request) {
   }
 
   const info = BANK_PROVIDERS.find((b) => b.id === body.provider);
-  const passwordKeys =
-    info?.credentialFields.filter((f) => f.type === "password").map((f) => f.key) ?? [];
+  if (!info) {
+    return NextResponse.json(
+      { success: false, message: `Unsupported provider: ${body.provider}` },
+      { status: 400 }
+    );
+  }
+  const passwordKeys = info.credentialFields
+    .filter((f) => f.type === "password")
+    .map((f) => f.key);
 
   const credentialId = body.credentialId;
   const existing =
@@ -42,7 +87,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const merged: Record<string, string> = { ...body.credentials };
+  const merged = normalizeCredentials(body.credentials, info);
   for (const key of passwordKeys) {
     if (!merged[key] || merged[key].trim() === "") {
       if (existing && existing[key]) {
@@ -51,13 +96,12 @@ export async function POST(request: Request) {
     }
   }
 
-  for (const key of passwordKeys) {
-    if (!merged[key]) {
-      return NextResponse.json(
-        { success: false, message: `Missing required field: ${key}` },
-        { status: 400 }
-      );
-    }
+  const validationError = validateCredentials(merged, info);
+  if (validationError) {
+    return NextResponse.json(
+      { success: false, message: validationError },
+      { status: 400 }
+    );
   }
 
   if (existing?.otpLongTermToken && !merged.otpLongTermToken) {
