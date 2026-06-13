@@ -36,7 +36,7 @@ SELECT
   id, workspace_id, provider,
   CASE provider
     WHEN 'isracard' THEN 'Isracard'
-    WHEN 'cal' THEN 'CAL'
+    WHEN 'cal' THEN 'Visa Cal'
     WHEN 'max' THEN 'Max'
     WHEN 'hapoalim' THEN 'Bank Hapoalim'
     WHEN 'leumi' THEN 'Bank Leumi'

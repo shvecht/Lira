@@ -36,11 +36,11 @@ function sanitizeError(error: unknown): string {
   // Strip password and id values from JSON-like blobs.
   // Match a key followed by quoted string OR unquoted value, non-greedy.
   msg = msg.replace(
-    /"(password|id|card6Digits|cardSuffix)"\s*:\s*"[^"]*"/gi,
+    /"(password|id|username|nationalID|num|card6Digits|cardSuffix)"\s*:\s*"[^"]*"/gi,
     '"$1":"[REDACTED]"'
   );
   msg = msg.replace(
-    /\b(password|id|card6Digits|cardSuffix)\s*=\s*\S+/gi,
+    /\b(password|id|username|nationalID|num|card6Digits|cardSuffix)\s*=\s*\S+/gi,
     "$1=[REDACTED]"
   );
   return msg;
