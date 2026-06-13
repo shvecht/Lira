@@ -311,6 +311,19 @@ export type BankProvider =
   | "behatsdaa"
   | "oneZero";
 
+export function normalizeBankProvider(provider: string): BankProvider | null {
+  switch (provider) {
+    case "visaCal":
+    case "visa-cal":
+    case "visa_cal":
+      return "cal";
+    default:
+      return BANK_PROVIDERS.some((bank) => bank.id === provider)
+        ? (provider as BankProvider)
+        : null;
+  }
+}
+
 export interface CredentialField {
   key: string;
   label: string;
@@ -416,11 +429,22 @@ export const BANK_PROVIDERS: BankProviderInfo[] = [
     name: "Visa Cal",
     kind: "card",
     color: "#1B4E97",
-    blurb: "Cal-branded cards",
+    blurb: "Visa Cal credit cards",
     domain: "cal-online.co.il",
     credentialFields: [
-      { key: "username", label: "Username", type: "text" },
-      { key: "password", label: "Password", type: "password" },
+      {
+        key: "username",
+        label: "Visa Cal username",
+        type: "text",
+        placeholder: "Username from cal-online.co.il",
+        hint: "Use the same username you enter on the Visa Cal website/app.",
+      },
+      {
+        key: "password",
+        label: "Visa Cal password",
+        type: "password",
+        placeholder: "Password from cal-online.co.il",
+      },
     ],
     enabled: true,
   },

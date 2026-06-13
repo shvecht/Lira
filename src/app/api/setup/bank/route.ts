@@ -5,7 +5,7 @@ import {
   getBankCredentialMeta,
   saveBankCredentials,
 } from "@/server/db/queries/bank-credentials";
-import { BANK_PROVIDERS } from "@/lib/types";
+import { BANK_PROVIDERS, normalizeBankProvider } from "@/lib/types";
 import { getWorkspaceIdFromRequest } from "@/server/lib/workspace-context";
 
 export async function POST(request: Request) {
@@ -25,7 +25,15 @@ export async function POST(request: Request) {
     );
   }
 
-  const info = BANK_PROVIDERS.find((b) => b.id === body.provider);
+  const provider = normalizeBankProvider(body.provider);
+  if (!provider) {
+    return NextResponse.json(
+      { success: false, message: `Unsupported provider: ${body.provider}` },
+      { status: 400 }
+    );
+  }
+
+  const info = BANK_PROVIDERS.find((b) => b.id === provider);
   const passwordKeys =
     info?.credentialFields.filter((f) => f.type === "password").map((f) => f.key) ?? [];
 
@@ -51,10 +59,20 @@ export async function POST(request: Request) {
     }
   }
 
-  for (const key of passwordKeys) {
-    if (!merged[key]) {
+  for (const field of info?.credentialFields ?? []) {
+    const value = merged[field.key]?.trim();
+    if (!value) {
       return NextResponse.json(
-        { success: false, message: `Missing required field: ${key}` },
+        { success: false, message: `Missing required field: ${field.label}` },
+        { status: 400 }
+      );
+    }
+    if (field.exactLength != null && value.length !== field.exactLength) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `${field.label} must be exactly ${field.exactLength} digits`,
+        },
         { status: 400 }
       );
     }
@@ -68,11 +86,11 @@ export async function POST(request: Request) {
     body.label?.trim() ||
     (credentialId != null
       ? getBankCredentialMeta(workspaceId, credentialId)?.label
-      : defaultLabelForProvider(workspaceId, body.provider)) ||
-    defaultLabelForProvider(workspaceId, body.provider);
+      : defaultLabelForProvider(workspaceId, provider)) ||
+    defaultLabelForProvider(workspaceId, provider);
 
   try {
-    const id = saveBankCredentials(workspaceId, body.provider, merged, {
+    const id = saveBankCredentials(workspaceId, provider, merged, {
       credentialId,
       label,
       requiresManualTwoFactor: body.requiresManualTwoFactor,
