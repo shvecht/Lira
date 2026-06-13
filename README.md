@@ -47,7 +47,7 @@ The trade-off is honest: you self-host, you trust the scraper, and you accept th
 <td width="33%" valign="top">
 
 ### 🏦 Israeli bank integration
-Isracard, Visa Cal, Bank Hapoalim, Max, Bank Leumi, and other Israeli providers work out of the box via `israeli-bank-scrapers`.
+Isracard, Bank Hapoalim, and Max work out of the box. Visa Cal and Bank Leumi are on the roadmap.
 
 </td>
 <td width="33%" valign="top">
@@ -178,16 +178,10 @@ Everything inside the dashed box stays on your laptop. The only outbound traffic
 | Bank | Type | Status |
 |---|---|---|
 | **Isracard** | Credit card | ✅ Supported |
-| **Visa Cal** | Credit card | ✅ Supported |
-| **Max** (formerly Leumi Card) | Credit card | ✅ Supported |
-| **American Express IL** | Credit card | ✅ Supported |
 | **Bank Hapoalim** (incl. Poalim wallets) | Bank | ✅ Supported |
-| **Bank Leumi** | Bank | ✅ Supported |
-| **Mizrahi Tefahot** | Bank | ✅ Supported |
-| **Bank Discount / Mercantile** | Bank | ✅ Supported |
-| **FIBI group** (FIBI, Otsar Hahayal, Pagi, Massad) | Bank | ✅ Supported |
-| **Bank Yahav** | Bank | ✅ Supported |
-| **One Zero** | Bank | ✅ Supported with programmatic SMS setup |
+| **Max** (formerly Leumi Card) | Credit card | ✅ Supported |
+| Visa Cal | Credit card | 🚧 Planned |
+| Bank Leumi | Bank | 🚧 Planned |
 
 Don't see your bank? Adding a scraper is a small wrapper around `israeli-bank-scrapers` — see [Contributing](#contributing).
 
@@ -355,8 +349,8 @@ spent/
 ## Roadmap
 
 - [x] Hebrew UI with full RTL layout
-- [x] Visa Cal scraper
-- [x] Bank Leumi scraper
+- [ ] Visa Cal scraper
+- [ ] Bank Leumi scraper
 - [ ] CSV / OFX export
 - [ ] Custom user-defined categories
 - [ ] Mobile companion (Phase 2)
