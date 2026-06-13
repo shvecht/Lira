@@ -641,7 +641,7 @@
     },
     "cal": {
       "name": "Visa Cal",
-      "blurb": "Cal-branded cards"
+      "blurb": "Cal credit cards"
     },
     "max": {
       "name": "Max",
@@ -664,7 +664,7 @@
       "blurb": "Personal & mortgage banking"
     },
     "discount": {
-      "name": "Bank Discount",
+      "name": "Discount Bank",
       "blurb": "Personal & business accounts"
     },
     "mercantile": {

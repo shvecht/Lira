@@ -317,6 +317,10 @@ export function normalizeBankProvider(provider: string): BankProvider | null {
     case "visa-cal":
     case "visa_cal":
       return "cal";
+    case "discountBank":
+    case "discount-bank":
+    case "discount_bank":
+      return "discount";
     default:
       return BANK_PROVIDERS.some((bank) => bank.id === provider)
         ? (provider as BankProvider)
@@ -429,7 +433,7 @@ export const BANK_PROVIDERS: BankProviderInfo[] = [
     name: "Visa Cal",
     kind: "card",
     color: "#1B4E97",
-    blurb: "Visa Cal credit cards",
+    blurb: "Cal credit cards",
     domain: "cal-online.co.il",
     credentialFields: [
       {
@@ -502,7 +506,7 @@ export const BANK_PROVIDERS: BankProviderInfo[] = [
   },
   {
     id: "discount",
-    name: "Bank Discount",
+    name: "Discount Bank",
     kind: "bank",
     color: "#2E9C5C",
     blurb: "Personal & business accounts",
@@ -510,16 +514,16 @@ export const BANK_PROVIDERS: BankProviderInfo[] = [
     credentialFields: [
       {
         key: "id",
-        label: "ID Number",
+        label: "Discount ID number",
         type: "text",
         placeholder: "9-digit Israeli ID",
         exactLength: 9,
         numeric: true,
       },
-      { key: "password", label: "Password", type: "password" },
+      { key: "password", label: "Discount password", type: "password" },
       {
         key: "num",
-        label: "Identifier Code",
+        label: "Discount identifier code",
         type: "text",
         placeholder: "Your קוד מזהה",
         hint: "The 'קוד מזהה' you set up for Discount online banking. May contain letters and numbers, not the same as your account number.",
