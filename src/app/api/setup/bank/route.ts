@@ -8,6 +8,44 @@ import {
 import { BANK_PROVIDERS, normalizeBankProvider } from "@/lib/types";
 import { getWorkspaceIdFromRequest } from "@/server/lib/workspace-context";
 
+function normalizeCredentials(
+  credentials: Record<string, string>,
+  info: BankProviderInfo
+): Record<string, string> {
+  const normalized: Record<string, string> = {};
+  for (const field of info.credentialFields) {
+    const raw = credentials[field.key] ?? "";
+    const trimmed = raw.trim();
+    normalized[field.key] = field.numeric ? trimmed.replace(/\D/g, "") : trimmed;
+  }
+
+  for (const [key, value] of Object.entries(credentials)) {
+    if (!(key in normalized)) normalized[key] = value;
+  }
+
+  return normalized;
+}
+
+function validateCredentials(
+  credentials: Record<string, string>,
+  info: BankProviderInfo
+): string | null {
+  for (const field of info.credentialFields) {
+    const value = credentials[field.key]?.trim() ?? "";
+    if (!value) return `Missing required field: ${field.label}`;
+    if (field.exactLength != null && value.length !== field.exactLength) {
+      return `${field.label} must be exactly ${field.exactLength} characters.`;
+    }
+    if (field.maxLength != null && value.length > field.maxLength) {
+      return `${field.label} must be ${field.maxLength} characters or fewer.`;
+    }
+    if (field.numeric && !/^\d+$/.test(value)) {
+      return `${field.label} must contain digits only.`;
+    }
+  }
+  return null;
+}
+
 export async function POST(request: Request) {
   const workspaceId = getWorkspaceIdFromRequest(request);
   const body = (await request.json()) as {
@@ -50,7 +88,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const merged: Record<string, string> = { ...body.credentials };
+  const merged = normalizeCredentials(body.credentials, info);
   for (const key of passwordKeys) {
     if (!merged[key] || merged[key].trim() === "") {
       if (existing && existing[key]) {
