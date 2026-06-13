@@ -113,7 +113,7 @@ function classifyError(error: unknown): {
 
 const FRIENDLY_ERRORS: Record<string, string> = {
   INVALID_PASSWORD:
-    "The credentials were rejected by the bank. Double-check ID, card last 6 digits, and password.",
+    "The credentials were rejected by the provider. Double-check the username/ID, card digits (when requested), and password.",
   CHANGE_PASSWORD:
     "The bank is asking you to change your password. Log in via the bank's website first.",
   ACCOUNT_BLOCKED:

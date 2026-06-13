@@ -4,7 +4,7 @@ import {
   getRequiresManualTwoFactor,
 } from "@/server/db/queries/bank-credentials";
 import { scrapeBank } from "@/server/scrapers";
-import type { BankProvider } from "@/lib/types";
+import { normalizeBankProvider } from "@/lib/types";
 import { getWorkspaceIdFromRequest } from "@/server/lib/workspace-context";
 
 export async function POST(request: Request) {
@@ -14,6 +14,14 @@ export async function POST(request: Request) {
     credentialId?: number;
     credentials?: Record<string, string>;
   };
+
+  const provider = normalizeBankProvider(body.provider);
+  if (!provider) {
+    return NextResponse.json(
+      { success: false, message: `Unsupported provider: ${body.provider}` },
+      { status: 400 }
+    );
+  }
 
   const credentials =
     body.credentials ??
@@ -38,7 +46,7 @@ export async function POST(request: Request) {
 
   const result = await scrapeBank(
     workspaceId,
-    body.provider as BankProvider,
+    provider,
     credentials,
     sevenDaysAgo,
     { manualTwoFactor }
